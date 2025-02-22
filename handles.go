@@ -2,27 +2,34 @@ package main
 
 import (
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
-// Mock email sending handler
+type EmailRequest struct {
+	Sender    string `json:"sender" binding:"required"`
+	Recipient string `json:"recipient" binding:"required"`
+	Subject   string `json:"subject" binding:"required"`
+	Body      string `json:"body" binding:"required"`
+}
+
 func sendEmailHandler(c *gin.Context) {
-	var emailReq EmailRequest
-	if err := c.ShouldBindJSON(&emailReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+	var req EmailRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	// Simulate email sending logic (no real emails sent)
-	incrementEmailCount()
+	if emailStats.EmailsPerUser[req.Sender] >= emailStats.DailyLimit {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Daily limit reached for sender"})
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Email request received successfully",
-		"status":  "Queued",
-	})
+	incrementEmailCount(req.Sender)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Email accepted for delivery (mock)", "sender": req.Sender})
 }
 
-// Get email statistics
 func getStatsHandler(c *gin.Context) {
 	stats := getEmailStats()
 	c.JSON(http.StatusOK, stats)
