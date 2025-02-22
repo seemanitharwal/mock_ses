@@ -2,11 +2,43 @@
 
 This is a **mock implementation of AWS SES** built using **Go** and **Gin**, designed for testing email sending **without actually sending emails**. It mimics AWS SES behavior and tracks email statistics.
 
-## 📌 Features
-✅ **Mock email sending** (follows AWS SES API structure)  
-✅ **Tracks statistics** (total emails sent, per user, last sent times)  
-✅ **Implements AWS SES "warming-up" rule** (daily limits)  
-✅ **Thread-safe** with `sync.Mutex`  
+## 📌n Features
+👉 **Mock email sending** (follows AWS SES API structure)  
+👉 **Tracks statistics** (total emails sent, per user, last sent times)  
+👉 **Implements AWS SES "warming-up" rule** (daily limits)  
+👉 **Thread-safe** with `sync.Mutex`  
+
+---
+
+## Special Rules Implemented
+### Email Warming Up Rule
+AWS SES imposes restrictions on new accounts, limiting the number of emails that can be sent per day.
+
+- **Currently Hardcoded:** 10 emails per day.
+- **Behavior:** If the limit is reached, an error is returned.
+- **Possible Enhancement:** Make the limit configurable.
+
+### Error Codes and Meanings
+| HTTP Status | Error Code       | Description                               |
+|-------------|-----------------|-------------------------------------------|
+| 200         | Success          | Email request accepted (simulated).      |
+| 400         | LimitExceeded    | Exceeded daily email limit.              |
+| 400         | InvalidEmail     | Invalid email format or missing fields.  |
+| 500         | InternalError    | Unexpected server error.                 |
+
+---
+
+## 🚀 Current Implementation Approach
+### 1. Gin Web Framework
+Used to define HTTP routes and handle requests efficiently.
+
+### 2. Hardcoded Rate Limits
+- The API currently enforces a **daily limit of 10 emails per sender**.
+- If exceeded, it returns `400 Bad Request - LimitExceeded`.
+
+### 3. Data Storage (In-Memory)
+- Email logs and statistics are stored in **Go maps** (not persistent).
+- This makes it **fast** but resets when the server restarts.
 
 ---
 
