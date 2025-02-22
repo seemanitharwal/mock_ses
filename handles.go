@@ -6,13 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type EmailRequest struct {
-	Sender    string `json:"sender" binding:"required"`
-	Recipient string `json:"recipient" binding:"required"`
-	Subject   string `json:"subject" binding:"required"`
-	Body      string `json:"body" binding:"required"`
-}
-
 func sendEmailHandler(c *gin.Context) {
 	var req EmailRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
